@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Handler Coder</title>
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <script src="js/jquery.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <style>
+        textarea {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <h1>常用编码转换</h1>
+    </div>
+    <div class="row">
+        <textarea id="handle_area" placeholder="在这里放需要转换的字符串..." rows="5" onblur="this.focus();"></textarea>
+    </div>
+    <!--<div class="row">
+        <label>
+            <input type="checkbox" id="mode">
+            &nbsp;只转换选中的部分
+        </label>
+    </div>-->
+    <div class="row" id="btn_group">
+        <div class="col-xs-3">
+            <button class="btn btn-primary">ASCII编码(16)</button>
+        </div>
+        <div class="col-xs-3">
+            <button class="btn btn-primary">url编码</button>
+        </div>
+        <div class="col-xs-3">
+            <button class="btn btn-primary">HTML实体编码</button>
+        </div>
+        <div class="col-xs-3">
+            <button class="btn btn-primary">Unicode编码</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    var mode = 1;
+    var input = "";
+    $(function () {
+        $("#mode").click(function () {
+            if ($("#mode").prop("checked") === true) {
+                mode = 2;
+            }else {
+                mode = 1;
+            }
+        });
+        $("#btn_group button:eq(0)").click(asciiCoding);
+        $("#btn_group button:eq(1)").click(urlCoding);
+        $("#btn_group button:eq(2)").click(htmlEntityCoding);
+        $("#btn_group button:eq(3)").click(unicodeCoding);
+    });
+
+    function asciiCoding() {
+        var input;
+        var output = "";
+        var handle_area = $("#handle_area");
+        input = handle_area.val();
+        for (var i = 0; i < input.length; i++) {
+            var charCode16 = input.charCodeAt(i).toString(16);
+            output += "%" + charCode16;
+        }
+        handle_area.val(output);
+    }
+
+    function urlCoding() {
+        var handle_area = $("#handle_area");
+        var output = "";
+        input = handle_area.val();
+        if (mode === 1) {
+            //handle对象为全体
+            var paramStart = input.indexOf("?") + 1;
+            if (paramStart !== 0) {
+                output = input.substring(0, paramStart);
+                var param = input.substring(paramStart, input.length);
+                var matches = param.match(/[0-9a-z_!~*'().;?:@&+$,%#\-]=([0-9a-zA-Z_!~*'().;?:@+$,%#\-]*(?=&)|[0-9a-zA-Z_!~*'().;?:@+$,%#\-]*$)/g);
+                for (var i = 0; i < matches.length; i++) {
+                    var split = matches[i].split("=");
+                    output += split[0] + "=";
+                    for (var j = 0; j < split[1].length; j++) {
+                        var ascii10 = split[1].charCodeAt(j);
+                        output += "%" + ascii10.toString(16);
+                    }
+                    if (i !== matches.length - 1) {
+                        output += "&";
+                    }
+                }
+            }else {
+                output = input;
+            }
+        }/*else if (mode === 2) {
+            //handle对象为选中的部分
+            var select;
+            if (window.getSelection) {
+                //Most browsers
+                select = window.getSelection().toString();
+            }else if (document.selection && document.selection.createRange) {
+                //IE Opera
+                select = document.selection.createRange().text.toString();
+            }else {
+                alert("I have a problem to get what you select");
+                return;
+            }
+            var selectStart = input.indexOf(select);
+            output += input.substring(0, selectStart);
+            for (i = 0; i < select.length; i++) {
+                ascii10 = select.charCodeAt(i);
+                output += "%" + ascii10.toString(16);
+            }
+            output += input.substring(selectStart + select.length, input.length);
+        }
+*/
+        handle_area.val(output);
+    }
+    
+    function htmlEntityCoding() {
+        var input;
+        var output = "";
+        var handle_area = $("#handle_area");
+        input = handle_area.val();
+        for (var i = 0; i < input.length; i++) {
+            var char = input.charAt(i);
+            switch (char) {
+                case " ":
+                    output += "&nbsp;";
+                    break;
+                case "<":
+                    output += "&lt;";
+                    break;
+                case ">":
+                    output += "&gt;";
+                    break;
+                case "&":
+                    output += "&amp;";
+                    break;
+                case "\"":
+                    output += "&quot;";
+                    break;
+                case "\'":
+                    output += "&apos;";
+                    break;
+                default:
+                    output += char;
+            }
+        }
+        handle_area.val(output);
+    }
+
+    function unicodeCoding() {
+        var input;
+        var output = "";
+        var handle_area = $("#handle_area");
+        input = handle_area.val();
+        for (var i = 0; i < input.length; i++) {
+            var charCode16 = input.charCodeAt(i).toString();
+            output += "&#" + charCode16 + ";";
+        }
+        handle_area.val(output);
+    }
+</script>
+
+</body>
+</html>
